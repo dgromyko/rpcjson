@@ -17,21 +17,19 @@ class RPC
         @uri = URI.parse(url)
         @version = version
         @connections = 0
-        @http = Net::HTTP.start(@uri.host, @uri.port)
       end
 
       def make_request(body)
         @connections += 1
         if @connections > 2000
-          @http.finish
-          @http = Net::HTTP.start(@uri.host, @uri.port)
+          http.finish         
         end
         request = Net::HTTP::Post.new(@uri.request_uri)
-	if @uri.user != nil
-          request.basic_auth(@uri.user, @uri.password)
-	end
-	request.body = body
-	response = @http.request(request)
+      	if @uri.user != nil
+            request.basic_auth(@uri.user, @uri.password)
+      	end
+      	request.body = body
+      	response = http.request(request)
         JSON( response.body )
       end
 
@@ -115,6 +113,17 @@ class RPC
         # This member MUST NOT exist if there was an error invoking the method.
         # The value of this member is determined by the method invoked on the Server. 
         return answer['result']
+      end
+
+      private
+
+      def http
+        @http = Net::HTTP.start(@uri.host, @uri.port) 
+        if @uri.scheme == 'https'
+          @http.use_ssl = true
+          @http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        end
+        @http
       end
     end
   end
