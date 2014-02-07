@@ -118,12 +118,12 @@ class RPC
       private
 
       def http
-        @http = Net::HTTP.start(@uri.host, @uri.port) 
+        @http = Net::HTTP.new(@uri.host, @uri.port) 
         if @uri.scheme == 'https'
           @http.use_ssl = true
           @http.verify_mode = OpenSSL::SSL::VERIFY_PEER
         end
-        @http
+        @http.start
       end
     end
   end
